@@ -39,6 +39,7 @@ public :
   TTreeReaderArray<LorentzVector> jet_p4 = {fReader, "jet_p4"};
   TTreeReaderArray<float> jet_neutralEmFrac = {fReader, "jet_neutralEmFrac"};
   TTreeReaderArray<float> jet_neutralHadFrac = {fReader, "jet_neutralHadFrac"};
+  TTreeReaderArray<float> jet_muonFrac = {fReader, "jet_muonFrac"};
   TTreeReaderArray<int> jet_id = {fReader, "jet_id"};
   TTreeReaderArray<int> L1EG_bx = {fReader, "L1EG_bx"};
   TTreeReaderArray<LorentzVector> L1EG_p4 = {fReader, "L1EG_p4"};
@@ -66,6 +67,7 @@ public :
 
 private :
   TH2F * hreweight_;
+  bool useEMfrac_;
 
 
   TH2D * hJetPtEtaEGeffDenom_;
@@ -76,6 +78,13 @@ private :
   TH2D * hJetPtEtaEGeffNum_bx2_;
 
   TH2D * hJet30EGEtaPhi_;
+
+  TH2D * hJetPtEtaFinOReffDenom_;
+  TH2D * hJetPtEtaFinOReffNum_bxm2_;
+  TH2D * hJetPtEtaFinOReffNum_bxm1_;
+  TH2D * hJetPtEtaFinOReffNum_bx0_;
+  TH2D * hJetPtEtaFinOReffNum_bx1_;
+  TH2D * hJetPtEtaFinOReffNum_bx2_;
 
   TH1D * hJetL1ADenom_;
   TH1D * hJetL1ANum_bxm2_;
