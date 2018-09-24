@@ -64,21 +64,21 @@ void ZAnalysis::Begin(TTree * /*tree*/)
   hPhoL1EGDeltaRsecond_ = newOutput<TH1D>("PhoL1EGDeltaRsecond", "Second L1EG;#DeltaR(electron,L1EG);Counts", 20, 0, 1);
   hPhoL1EGnearestBx_ = newOutput<TH2D>("PhoL1EGnearestBx", "EG matches;Closest L1EG bx;Second closest L1EG bx", 3, -1.5, 1.5, 3, -1.5, 1.5);
 
-  hElePhomassL1Pt_bxm1_ = newOutput<TH2D>("ElePhomassL1Pt_bxm1", "L1EG in BX -1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
-  hElePhomassL1Pt_bx0_ = newOutput<TH2D>("ElePhomassL1Pt_bx0", "L1EG in BX 0;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
-  hElePhomassL1Pt_bx1_ = newOutput<TH2D>("ElePhomassL1Pt_bx1", "L1EG in BX 1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhomassPhoPt_bxm1_ = newOutput<TH2D>("ElePhomassPhoPt_bxm1", "L1EG in BX -1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhomassPhoPt_bx0_ = newOutput<TH2D>("ElePhomassPhoPt_bx0", "L1EG in BX 0;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhomassPhoPt_bx1_ = newOutput<TH2D>("ElePhomassPhoPt_bx1", "L1EG in BX 1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
 
-  hElePhoEta1p0massL1Pt_bxm1_ = newOutput<TH2D>("ElePhoEta1p0massL1Pt_bxm1", "L1EG in BX -1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
-  hElePhoEta1p0massL1Pt_bx0_ =  newOutput<TH2D>("ElePhoEta1p0massL1Pt_bx0", "L1EG in BX 0;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
-  hElePhoEta1p0massL1Pt_bx1_ =  newOutput<TH2D>("ElePhoEta1p0massL1Pt_bx1", "L1EG in BX 1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhoEta1p0massPhoPt_bxm1_ = newOutput<TH2D>("ElePhoEta1p0massPhoPt_bxm1", "L1EG in BX -1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhoEta1p0massPhoPt_bx0_ =  newOutput<TH2D>("ElePhoEta1p0massPhoPt_bx0", "L1EG in BX 0;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhoEta1p0massPhoPt_bx1_ =  newOutput<TH2D>("ElePhoEta1p0massPhoPt_bx1", "L1EG in BX 1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
 
-  hElePhoEta2p0massL1Pt_bxm1_ = newOutput<TH2D>("ElePhoEta2p0massL1Pt_bxm1", "L1EG in BX -1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
-  hElePhoEta2p0massL1Pt_bx0_ = newOutput<TH2D>("ElePhoEta2p0massL1Pt_bx0", "L1EG in BX 0;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
-  hElePhoEta2p0massL1Pt_bx1_ = newOutput<TH2D>("ElePhoEta2p0massL1Pt_bx1", "L1EG in BX 1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhoEta2p0massPhoPt_bxm1_ = newOutput<TH2D>("ElePhoEta2p0massPhoPt_bxm1", "L1EG in BX -1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhoEta2p0massPhoPt_bx0_ = newOutput<TH2D>("ElePhoEta2p0massPhoPt_bx0", "L1EG in BX 0;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhoEta2p0massPhoPt_bx1_ = newOutput<TH2D>("ElePhoEta2p0massPhoPt_bx1", "L1EG in BX 1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
 
-  hElePhoEta2p5massL1Pt_bxm1_ = newOutput<TH2D>("ElePhoEta2p5massL1Pt_bxm1", "L1EG in BX -1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
-  hElePhoEta2p5massL1Pt_bx0_ = newOutput<TH2D>("ElePhoEta2p5massL1Pt_bx0", "L1EG in BX 0;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
-  hElePhoEta2p5massL1Pt_bx1_ = newOutput<TH2D>("ElePhoEta2p5massL1Pt_bx1", "L1EG in BX 1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhoEta2p5massPhoPt_bxm1_ = newOutput<TH2D>("ElePhoEta2p5massPhoPt_bxm1", "L1EG in BX -1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhoEta2p5massPhoPt_bx0_ = newOutput<TH2D>("ElePhoEta2p5massPhoPt_bx0", "L1EG in BX 0;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
+  hElePhoEta2p5massPhoPt_bx1_ = newOutput<TH2D>("ElePhoEta2p5massPhoPt_bx1", "L1EG in BX 1;m_{e#gamma} [GeV];L1EG p_{T} [GeV];Counts", nMassBins, massBinning, nPtBins, l1egPtBinning);
 }
 
 void ZAnalysis::SlaveBegin(TTree * /*tree*/)
@@ -168,24 +168,24 @@ Bool_t ZAnalysis::Process(Long64_t entry)
     }
 
     if ( minDeltaR < 0.2 ) {
-      if ( L1EG_bx[L1match] == -1 ) hElePhomassL1Pt_bxm1_->Fill(mass, L1EG_p4[L1match].Pt());
-      if ( L1EG_bx[L1match] == 0 )  hElePhomassL1Pt_bx0_->Fill(mass, L1EG_p4[L1match].Pt());
-      if ( L1EG_bx[L1match] == 1 )  hElePhomassL1Pt_bx1_->Fill(mass, L1EG_p4[L1match].Pt());
+      if ( L1EG_bx[L1match] == -1 ) hElePhomassPhoPt_bxm1_->Fill(mass, pho.Pt());
+      if ( L1EG_bx[L1match] == 0 )  hElePhomassPhoPt_bx0_->Fill(mass, pho.Pt());
+      if ( L1EG_bx[L1match] == 1 )  hElePhomassPhoPt_bx1_->Fill(mass, pho.Pt());
 
       if ( std::abs(pho.Eta()) >= 2.5 ) {
-        if ( L1EG_bx[L1match] == -1 ) hElePhoEta2p5massL1Pt_bxm1_->Fill(mass, L1EG_p4[L1match].Pt());
-        if ( L1EG_bx[L1match] == 0 )  hElePhoEta2p5massL1Pt_bx0_->Fill(mass, L1EG_p4[L1match].Pt());
-        if ( L1EG_bx[L1match] == 1 )  hElePhoEta2p5massL1Pt_bx1_->Fill(mass, L1EG_p4[L1match].Pt());
+        if ( L1EG_bx[L1match] == -1 ) hElePhoEta2p5massPhoPt_bxm1_->Fill(mass, pho.Pt());
+        if ( L1EG_bx[L1match] == 0 )  hElePhoEta2p5massPhoPt_bx0_->Fill(mass, pho.Pt());
+        if ( L1EG_bx[L1match] == 1 )  hElePhoEta2p5massPhoPt_bx1_->Fill(mass, pho.Pt());
       }
       else if ( std::abs(pho.Eta()) >= 2.0 ) {
-        if ( L1EG_bx[L1match] == -1 ) hElePhoEta2p0massL1Pt_bxm1_->Fill(mass, L1EG_p4[L1match].Pt());
-        if ( L1EG_bx[L1match] == 0 )  hElePhoEta2p0massL1Pt_bx0_->Fill(mass, L1EG_p4[L1match].Pt());
-        if ( L1EG_bx[L1match] == 1 )  hElePhoEta2p0massL1Pt_bx1_->Fill(mass, L1EG_p4[L1match].Pt());
+        if ( L1EG_bx[L1match] == -1 ) hElePhoEta2p0massPhoPt_bxm1_->Fill(mass, pho.Pt());
+        if ( L1EG_bx[L1match] == 0 )  hElePhoEta2p0massPhoPt_bx0_->Fill(mass, pho.Pt());
+        if ( L1EG_bx[L1match] == 1 )  hElePhoEta2p0massPhoPt_bx1_->Fill(mass, pho.Pt());
       }
       else if ( std::abs(pho.Eta()) >= 1.0 ) {
-        if ( L1EG_bx[L1match] == -1 ) hElePhoEta1p0massL1Pt_bxm1_->Fill(mass, L1EG_p4[L1match].Pt());
-        if ( L1EG_bx[L1match] == 0 )  hElePhoEta1p0massL1Pt_bx0_->Fill(mass, L1EG_p4[L1match].Pt());
-        if ( L1EG_bx[L1match] == 1 )  hElePhoEta1p0massL1Pt_bx1_->Fill(mass, L1EG_p4[L1match].Pt());
+        if ( L1EG_bx[L1match] == -1 ) hElePhoEta1p0massPhoPt_bxm1_->Fill(mass, pho.Pt());
+        if ( L1EG_bx[L1match] == 0 )  hElePhoEta1p0massPhoPt_bx0_->Fill(mass, pho.Pt());
+        if ( L1EG_bx[L1match] == 1 )  hElePhoEta1p0massPhoPt_bx1_->Fill(mass, pho.Pt());
       }
     }
   }

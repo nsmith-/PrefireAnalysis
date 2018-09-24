@@ -139,10 +139,10 @@ ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.ERROR)
 
 
 effs = {
-    'PhoL1EGMatchPrefireEffEtaIncl': ('ElePhomassL1Pt_bxm1', 'ElePhomassL1Pt_bx0'),
-    'PhoL1EGMatchPrefireEffEta1p0': ('ElePhoEta1p0massL1Pt_bxm1', 'ElePhoEta1p0massL1Pt_bx0'),
-    'PhoL1EGMatchPrefireEffEta2p0': ('ElePhoEta2p0massL1Pt_bxm1', 'ElePhoEta2p0massL1Pt_bx0'),
-    'PhoL1EGMatchPrefireEffEta2p5': ('ElePhoEta2p5massL1Pt_bxm1', 'ElePhoEta2p5massL1Pt_bx0'),
+    'PhoL1EGMatchPrefireEffEtaIncl': ('ElePhomassPhoPt_bxm1', 'ElePhomassPhoPt_bx0'),
+    'PhoL1EGMatchPrefireEffEta1p0': ('ElePhoEta1p0massPhoPt_bxm1', 'ElePhoEta1p0massPhoPt_bx0'),
+    'PhoL1EGMatchPrefireEffEta2p0': ('ElePhoEta2p0massPhoPt_bxm1', 'ElePhoEta2p0massPhoPt_bx0'),
+    'PhoL1EGMatchPrefireEffEta2p5': ('ElePhoEta2p5massPhoPt_bxm1', 'ElePhoEta2p5massPhoPt_bx0'),
     'L1EGPrefireEffEtaIncl': ('EleL1EGmassL1Pt_bxm1', 'EleL1EGmassL1Pt_bx0'),
     'L1EGPrefireEffEta2p0': ('EleL1EGEta2p0massL1Pt_bxm1', 'EleL1EGEta2p0massL1Pt_bx0'),
     'L1EGPrefireEffEta2p5': ('EleL1EGEta2p5massL1Pt_bxm1', 'EleL1EGEta2p5massL1Pt_bx0'),
@@ -150,11 +150,11 @@ effs = {
 
 def etastr(plotname):
     if '2p5' in plotname:
-        return "2.5#leq|#eta^{L1}|<3"
+        return "2.5#leq|#eta^{#gamma}|<3"
     elif '2p0' in plotname:
-        return "2.0#leq|#eta^{L1}|<2.5"
+        return "2.0#leq|#eta^{#gamma}|<2.5"
     elif '1p0' in plotname:
-        return "1.0#leq|#eta^{L1}|<2.0"
+        return "1.0#leq|#eta^{#gamma}|<2.0"
     return "0#leq|#eta^{L1}|<3"
 
 fits = {}
@@ -205,5 +205,8 @@ for name, pair in effs.iteritems():
     geff.SetNameTitle(name, name)
     c = ROOT.TCanvas(name)
     geff.Draw("ape")
+    geff.GetXaxis().SetTitle("Offline #gamma p_{T} [GeV]")
+    geff.GetYaxis().SetTitle("L1EG in BX -1 efficiency")
+    header("%s, %s" % (hdr, etastr(name)))
     c.Print("%s/%s.pdf" % (outDir, name))
 

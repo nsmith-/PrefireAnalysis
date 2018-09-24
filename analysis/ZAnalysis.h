@@ -93,21 +93,21 @@ private :
   TH1D * hPhoL1EGDeltaRsecond_;
   TH2D * hPhoL1EGnearestBx_;
 
-  TH2D * hElePhomassL1Pt_bxm1_;
-  TH2D * hElePhomassL1Pt_bx0_;
-  TH2D * hElePhomassL1Pt_bx1_;
+  TH2D * hElePhomassPhoPt_bxm1_;
+  TH2D * hElePhomassPhoPt_bx0_;
+  TH2D * hElePhomassPhoPt_bx1_;
 
-  TH2D * hElePhoEta1p0massL1Pt_bxm1_;
-  TH2D * hElePhoEta1p0massL1Pt_bx0_;
-  TH2D * hElePhoEta1p0massL1Pt_bx1_;
+  TH2D * hElePhoEta1p0massPhoPt_bxm1_;
+  TH2D * hElePhoEta1p0massPhoPt_bx0_;
+  TH2D * hElePhoEta1p0massPhoPt_bx1_;
 
-  TH2D * hElePhoEta2p0massL1Pt_bxm1_;
-  TH2D * hElePhoEta2p0massL1Pt_bx0_;
-  TH2D * hElePhoEta2p0massL1Pt_bx1_;
+  TH2D * hElePhoEta2p0massPhoPt_bxm1_;
+  TH2D * hElePhoEta2p0massPhoPt_bx0_;
+  TH2D * hElePhoEta2p0massPhoPt_bx1_;
 
-  TH2D * hElePhoEta2p5massL1Pt_bxm1_;
-  TH2D * hElePhoEta2p5massL1Pt_bx0_;
-  TH2D * hElePhoEta2p5massL1Pt_bx1_;
+  TH2D * hElePhoEta2p5massPhoPt_bxm1_;
+  TH2D * hElePhoEta2p5massPhoPt_bx0_;
+  TH2D * hElePhoEta2p5massPhoPt_bx1_;
 
   template<typename T, typename... Args>
     T * newOutput(Args... args) {
