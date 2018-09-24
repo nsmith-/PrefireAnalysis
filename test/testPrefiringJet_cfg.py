@@ -1,6 +1,15 @@
 import FWCore.ParameterSet.Config as cms
 
 from FWCore.ParameterSet.VarParsing import VarParsing
+options = VarParsing()
+options.register(
+    "is2016",
+    True,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "2016 vs 2017+ label name for trigger objects (selectedPatTrigger vs. slimmedPatTrigger)"
+)
+options.parseArguments()
 
 process = cms.Process("TEST")
 
@@ -58,6 +67,8 @@ process.ntuple = cms.EDAnalyzer("PrefiringJetAna",
     l1egSrc = cms.InputTag("caloStage2Digis:EGamma"),
     l1jetSrc = cms.InputTag("caloStage2Digis:Jet"),
     l1GtSrc = cms.InputTag("gtStage2Digis"),
+    triggerObjects = cms.InputTag("selectedPatTrigger" if options.is2016 else "slimmedPatTrigger"),
+    triggerPrescales = cms.InputTag("patTrigger"),
 )
 
 process.bxm1_pass = cms.EDAnalyzer("L1EGCheck",

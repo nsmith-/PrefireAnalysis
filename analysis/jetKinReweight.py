@@ -1,14 +1,14 @@
 import ROOT
 
-fnum = ROOT.TFile.Open("prefiringJet_SingleMuon_Run2017F.root")
-fdenom = ROOT.TFile.Open("prefiringJet_Run2017F.root")
+fnum = ROOT.TFile.Open("prefiringJet_SingleMuon_Run2016B-H.root")
+fdenom = ROOT.TFile.Open("prefiringJet_JetHT_Run2016B-H.root")
 
 tnum = fnum.Get("ntuple/tree")
 tdenom = fdenom.Get("ntuple/tree")
 
-tnum.Draw("jet_p4.Pt()*jet_neutralEmFrac:abs(jet_p4.Eta())>>hnum(5,2.5,3,20,0,400)", "Sum$(abs(jet_p4.Eta())>=2.)==1", "goff")
+tnum.Draw("jet_p4.Pt():abs(jet_p4.Eta())>>hnum(5,2.5,3,20,0,400)", "Sum$(abs(jet_p4.Eta())>=2.)==1", "goff")
 num = ROOT.gDirectory.Get("hnum")
-tdenom.Draw("jet_p4.Pt()*jet_neutralEmFrac:abs(jet_p4.Eta())>>hdenom(5,2.5,3,20,0,400)", "Sum$(abs(jet_p4.Eta())>=2.)==1", "goff")
+tdenom.Draw("jet_p4.Pt():abs(jet_p4.Eta())>>hdenom(5,2.5,3,20,0,400)", "Sum$(abs(jet_p4.Eta())>=2.)==1", "goff")
 denom = ROOT.gDirectory.Get("hdenom")
 
 num.Scale(1./num.Integral())
@@ -26,7 +26,7 @@ for iY in range(num.GetNbinsY()+1):
             num.SetBinContent(iX, iY, num.GetBinContent(iX, iY)/maxbin)
 
 num.Draw("colztext")
-num.SetName("reweight")
+num.SetName("jetKinReweight")
 
-fout = ROOT.TFile("reweight.root", "recreate")
+fout = ROOT.TFile("jetKinReweight.root", "recreate")
 num.Write()

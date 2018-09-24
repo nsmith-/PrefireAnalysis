@@ -16,9 +16,11 @@ ROOT.gStyle.SetPalette(ROOT.kBird)
 ROOT.gStyle.SetNumberContours(100)
 ROOT.gStyle.SetPadRightMargin(0.15)
 ROOT.gStyle.SetCanvasDefW(int(600*(1.1)))
+ROOT.gStyle.SetPaintTextFormat(".2f")
 
 # era = "JetHT_2016H"
 era = sys.argv[1]
+dataset, run = era.split("_")
 hdr = era.replace("_", " ")
 outDir = "JetAnalysis/%s" % era
 
@@ -36,10 +38,23 @@ sel = ROOT.JetAnalysis()
 inputs = ROOT.TList()
 sel.SetInputList(inputs)
 
+# Jet kinematic reweighting
 if False:
-    frw = ROOT.TFile.Open("reweight.root")
-    hrw = frw.Get("reweight")
+    frw = ROOT.TFile.Open("jetKinReweight.root")
+    hrw = frw.Get("jetKinReweight")
     inputs.Add(hrw)
+
+# Luminosity correction
+if False:
+    flumirw = ROOT.TFile.Open("lumiCorrection.root")
+    glumirw = flumirw.Get(dataset)
+    if not glumirw:
+        raise Exception("No luminosity correction available for " + dataset)
+    glumirw.SetName("lumiReweight")
+    inputs.Add(glumirw)
+
+useEMfraction = False
+inputs.Add(ROOT.TParameter("bool")("useEMfraction", useEMfraction))
 
 t.Process(sel)
 hists = dict((h.GetName(), h) for h in sel.GetOutputList())
@@ -63,9 +78,10 @@ bx = [(-2, 'bxm2'), (-1, 'bxm1'), (0, 'bx0'), (1, 'bx1'), (2, 'bx2')]
 
 for ibx, bxn in bx:
     c = ROOT.TCanvas()
+    c.SetLogy(True)
     eff = ROOT.TEfficiency(hists['num_'+bxn], hists['denom'])
     eff.SetName("prefireEfficiencyMap")
-    eff.Draw("colz")
+    eff.Draw("colztext")
     c.Paint()
     eff.GetPaintedHistogram().GetZaxis().SetTitle("L1IsoEG30 in BX %d Efficiency (#DeltaR<0.4)" % ibx)
     eff.GetPaintedHistogram().GetZaxis().SetRangeUser(0, 1)
@@ -73,6 +89,24 @@ for ibx, bxn in bx:
     c.Print(outDir+"/Jet_L1IsoEG30eff_%s_looseJet_%s.pdf" % (bxn, era))
     c.Print(outDir+"/Jet_L1IsoEG30eff_%s_looseJet_%s.root" % (bxn, era))
     fout = ROOT.TFile(outDir+"/Map_Jet_L1IsoEG30eff_%s_looseJet_%s.root" % (bxn, era), "recreate")
+    eff.Write()
+    fout = None
+    ROOT.SetOwnership(eff, False)
+    ROOT.SetOwnership(c, False)
+
+for ibx, bxn in bx:
+    c = ROOT.TCanvas()
+    c.SetLogy(True)
+    eff = ROOT.TEfficiency(hists['numFinOR_'+bxn], hists['denomFinOR'])
+    eff.SetName("prefireEfficiencyMap")
+    eff.Draw("colztext")
+    c.Paint()
+    eff.GetPaintedHistogram().GetZaxis().SetTitle("L1 FinOR in BX %d Efficiency" % ibx)
+    eff.GetPaintedHistogram().GetZaxis().SetRangeUser(0, 1)
+    header(hdr)
+    c.Print(outDir+"/Jet_L1FinOReff_%s_looseJet_%s.pdf" % (bxn, era))
+    c.Print(outDir+"/Jet_L1FinOReff_%s_looseJet_%s.root" % (bxn, era))
+    fout = ROOT.TFile(outDir+"/Map_Jet_L1FinOReff_%s_looseJet_%s.root" % (bxn, era), "recreate")
     eff.Write()
     fout = None
     ROOT.SetOwnership(eff, False)
@@ -96,18 +130,18 @@ for ibx, bxn in bx:
     ROOT.SetOwnership(l, False)
 
 
-c2 = ROOT.TCanvas()
-mg = ROOT.TMultiGraph("mgeffthr", ";Jet p_{T}^{EM} [GeV];BX -1 Trigger Efficiency")
-efflow = ROOT.TEfficiency(hists['numJetEGthr_eglow'], hists['denomJetEGthr']).CreateGraph()
+c2 = ROOT.TCanvas("effComparison", "")
+mg = ROOT.TMultiGraph("mgeffthr", ";Jet p_{T}%s [GeV];BX -1 Trigger Efficiency" % ("^{EM}" if useEMfraction else ""))
+efflow = ROOT.TEfficiency(hists['numJetEGthr_eglow'], hists['denomJetEGthr']).CreateGraph("e0")
 efflow.SetMarkerColor(ROOT.kRed)
 mg.Add(efflow, "p")
-effmed = ROOT.TEfficiency(hists['numJetEGthr_egmed'], hists['denomJetEGthr']).CreateGraph()
+effmed = ROOT.TEfficiency(hists['numJetEGthr_egmed'], hists['denomJetEGthr']).CreateGraph("e0")
 effmed.SetMarkerColor(ROOT.kBlue)
 mg.Add(effmed, "p")
-effhigh = ROOT.TEfficiency(hists['numJetEGthr_eghigh'], hists['denomJetEGthr']).CreateGraph()
+effhigh = ROOT.TEfficiency(hists['numJetEGthr_eghigh'], hists['denomJetEGthr']).CreateGraph("e0")
 effhigh.SetMarkerColor(ROOT.kGreen)
 mg.Add(effhigh, "p")
-finorm1 = ROOT.TEfficiency(hists['numL1A_bxm1'], hists['denomL1A']).CreateGraph()
+finorm1 = ROOT.TEfficiency(hists['numL1A_bxm1'], hists['denomL1A']).CreateGraph("e0")
 finorm1.SetMarkerColor(ROOT.kBlack)
 mg.Add(finorm1, "p")
 mg.Draw("a")
