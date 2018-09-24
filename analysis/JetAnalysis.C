@@ -27,6 +27,7 @@
 
 #include "JetAnalysis.h"
 #include "TRandom.h"
+#include "TParameter.h"
 
 void JetAnalysis::Begin(TTree * /*tree*/)
 {
@@ -44,7 +45,6 @@ void JetAnalysis::Begin(TTree * /*tree*/)
   // const double jetPtBinning[] = {30.0, 40.0, 50.0, 65.0, 80.0, 100.0, 125.0, 150.0, 175.0, 200.0, 225.0, 250.0, 275.0, 300.0, 400.0, 500.0, 600.0};
   const int nPtBins = sizeof(jetPtBinning)/sizeof(double)-1;
   const char * ptVar = "Jet p_{T} [GeV]";
-  useEMfrac_ = false;
 
   const double jetEtaBinning[] = {0, 1., 1.5, 2., 2.25, 2.5, 2.75, 3., 3.5};
   // const double jetEtaBinning[] = {-3.5, -3., -2.75, -2.5, -2.25, -2., -1.5, -1., 0, 1., 1.5, 2., 2.25, 2.5, 2.75, 3., 3.5};
@@ -85,7 +85,16 @@ void JetAnalysis::Begin(TTree * /*tree*/)
 
 void JetAnalysis::SlaveBegin(TTree * /*tree*/)
 {
-  hreweight_ = (TH2F *) GetInputList()->FindObject("reweight");
+  hjetKinReweight_ = (TH2F *) GetInputList()->FindObject("jetKinReweight");
+  gLumiReweight_ = (TGraph *) GetInputList()->FindObject("lumiReweight");
+  
+  auto getFlag = [this] (const char * name) -> bool {
+    auto flag = (TParameter<bool> *) GetInputList()->FindObject(name);
+    if ( flag != nullptr ) return flag->GetVal();
+    return false;
+  };
+
+  useEMfrac_ = getFlag("useEMfraction");
 
   TString option = GetOption();
 
@@ -116,6 +125,18 @@ Bool_t JetAnalysis::Process(Long64_t entry)
     }
   }
 
+  float weight = 1.;
+  if ( gLumiReweight_ != nullptr ) {
+    if ( runIndexCached_ < 0 or gLumiReweight_->GetX()[runIndexCached_] != *run ) {
+      runIndexCached_ = TMath::BinarySearch(gLumiReweight_->GetN(), gLumiReweight_->GetX(), (double) *run);
+      if ( gLumiReweight_->GetX()[runIndexCached_] != *run ) {
+        std::cout << "Run not in lumi reweight table: " << *run << std::endl;
+        return true;
+      }
+    }
+    weight *= gLumiReweight_->GetY()[runIndexCached_];
+  }
+
   auto etaBinCut = [] (LorentzVector jet) -> bool {
     return std::abs(jet.Eta()) >= 2.5 and std::abs(jet.Eta()) < 3.;
   };
@@ -138,8 +159,9 @@ Bool_t JetAnalysis::Process(Long64_t entry)
       vetoEvent = true;
     }
 
-    if ( hreweight_ != nullptr and gRandom->Uniform() >= hreweight_->GetBinContent(hreweight_->FindBin(std::abs(jet.Eta()), jet.Pt())) ) {
-      continue;
+    float jweight = weight;
+    if ( hjetKinReweight_ != nullptr ) {
+      jweight *= hjetKinReweight_->GetBinContent(hjetKinReweight_->FindBin(std::abs(jet.Eta()), jet.Pt()));
     }
 
     int match_bx{0};
@@ -148,7 +170,7 @@ Bool_t JetAnalysis::Process(Long64_t entry)
       if ( L1EG_p4[iEG].Pt() > 30. and (L1EG_iso[iEG] & 0x1) and DeltaR(L1EG_p4[iEG], jet) < 0.4 ) {
         match_bx |= bit(L1EG_bx[iEG]+2);
         if ( jet.Pt() > 30. and L1EG_bx[iEG] == -1 ) {
-          hJet30EGEtaPhi_->Fill(L1EG_p4[iEG].Eta(), L1EG_p4[iEG].Phi());
+          hJet30EGEtaPhi_->Fill(L1EG_p4[iEG].Eta(), L1EG_p4[iEG].Phi(), jweight);
         }
       }
       if ( etaBinCut(jet) and L1EG_bx[iEG] == -1 and (L1EG_iso[iEG] & 0x1) ) {
@@ -159,52 +181,53 @@ Bool_t JetAnalysis::Process(Long64_t entry)
         }
       }
       if ( etaBinCut(jet) and (L1EG_iso[iEG] & 0x1) and L1EG_p4[iEG].Pt() > 20. ) {
-        if ( L1EG_bx[iEG] == -1 ) hJetEGdeltaR_bxm1_->Fill(DeltaR(L1EG_p4[iEG], jet));
-        if ( L1EG_bx[iEG] ==  0 ) hJetEGdeltaR_bx0_->Fill(DeltaR(L1EG_p4[iEG], jet));
-        if ( L1EG_bx[iEG] ==  1 ) hJetEGdeltaR_bx1_->Fill(DeltaR(L1EG_p4[iEG], jet));
+        if ( L1EG_bx[iEG] == -1 ) hJetEGdeltaR_bxm1_->Fill(DeltaR(L1EG_p4[iEG], jet), jweight);
+        if ( L1EG_bx[iEG] ==  0 ) hJetEGdeltaR_bx0_->Fill(DeltaR(L1EG_p4[iEG], jet), jweight);
+        if ( L1EG_bx[iEG] ==  1 ) hJetEGdeltaR_bx1_->Fill(DeltaR(L1EG_p4[iEG], jet), jweight);
       }
     }
 
-    hJetPtEtaEGeffDenom_->Fill(std::abs(jet.Eta()), jet.Pt());
-    if ( match_bx & bit(-2+2) ) hJetPtEtaEGeffNum_bxm2_->Fill(std::abs(jet.Eta()), jet.Pt());
-    if ( match_bx & bit(-1+2) ) hJetPtEtaEGeffNum_bxm1_->Fill(std::abs(jet.Eta()), jet.Pt());
-    if ( match_bx & bit( 0+2) ) hJetPtEtaEGeffNum_bx0_ ->Fill(std::abs(jet.Eta()), jet.Pt());
-    if ( match_bx & bit( 1+2) ) hJetPtEtaEGeffNum_bx1_ ->Fill(std::abs(jet.Eta()), jet.Pt());
-    if ( match_bx & bit( 2+2) ) hJetPtEtaEGeffNum_bx2_ ->Fill(std::abs(jet.Eta()), jet.Pt());
+    hJetPtEtaEGeffDenom_->Fill(std::abs(jet.Eta()), jet.Pt(), jweight);
+    if ( match_bx & bit(-2+2) ) hJetPtEtaEGeffNum_bxm2_->Fill(std::abs(jet.Eta()), jet.Pt(), jweight);
+    if ( match_bx & bit(-1+2) ) hJetPtEtaEGeffNum_bxm1_->Fill(std::abs(jet.Eta()), jet.Pt(), jweight);
+    if ( match_bx & bit( 0+2) ) hJetPtEtaEGeffNum_bx0_ ->Fill(std::abs(jet.Eta()), jet.Pt(), jweight);
+    if ( match_bx & bit( 1+2) ) hJetPtEtaEGeffNum_bx1_ ->Fill(std::abs(jet.Eta()), jet.Pt(), jweight);
+    if ( match_bx & bit( 2+2) ) hJetPtEtaEGeffNum_bx2_ ->Fill(std::abs(jet.Eta()), jet.Pt(), jweight);
 
     if ( etaBinCut(jet) ) {
-      hJetEGm1thrDenom_->Fill(jet.Pt());
-      if ( match_thr & bit(0) ) hJetEGm1thrNum_EGlow_->Fill(jet.Pt());
-      if ( match_thr & bit(1) ) hJetEGm1thrNum_EGmed_->Fill(jet.Pt());
-      if ( match_thr & bit(2) ) hJetEGm1thrNum_EGhigh_->Fill(jet.Pt());
+      hJetEGm1thrDenom_->Fill(jet.Pt(), jweight);
+      if ( match_thr & bit(0) ) hJetEGm1thrNum_EGlow_->Fill(jet.Pt(), jweight);
+      if ( match_thr & bit(1) ) hJetEGm1thrNum_EGmed_->Fill(jet.Pt(), jweight);
+      if ( match_thr & bit(2) ) hJetEGm1thrNum_EGhigh_->Fill(jet.Pt(), jweight);
     }
   }
 
   if ( forwardJets.size() == 1 and not vetoEvent ) {
     LorentzVector jet = forwardJets[0];
-    if ( hreweight_ == nullptr or gRandom->Uniform() < hreweight_->GetBinContent(hreweight_->FindBin(std::abs(jet.Eta()), jet.Pt())) ) {
-      hJetPtEtaFinOReffDenom_->Fill(std::abs(jet.Eta()), jet.Pt());
-      if ( etaBinCut(jet) ) hJetL1ADenom_->Fill(jet.Pt());
-      if ( L1GtBx[0] ) {
-        hJetPtEtaFinOReffNum_bxm2_->Fill(std::abs(jet.Eta()), jet.Pt());
-        if ( etaBinCut(jet) ) hJetL1ANum_bxm2_->Fill(jet.Pt());
-      }
-      if ( L1GtBx[1] ) {
-        hJetPtEtaFinOReffNum_bxm1_->Fill(std::abs(jet.Eta()), jet.Pt());
-        if ( etaBinCut(jet) ) hJetL1ANum_bxm1_->Fill(jet.Pt());
-      }
-      if ( L1GtBx[2] ) {
-        hJetPtEtaFinOReffNum_bx0_->Fill(std::abs(jet.Eta()), jet.Pt());
-        if ( etaBinCut(jet) ) hJetL1ANum_bx0_->Fill(jet.Pt());
-      }
-      if ( L1GtBx[3] ) {
-        hJetPtEtaFinOReffNum_bx1_->Fill(std::abs(jet.Eta()), jet.Pt());
-        if ( etaBinCut(jet) ) hJetL1ANum_bx1_->Fill(jet.Pt());
-      }
-      if ( L1GtBx[4] ) {
-        hJetPtEtaFinOReffNum_bx2_->Fill(std::abs(jet.Eta()), jet.Pt());
-        if ( etaBinCut(jet) ) hJetL1ANum_bx2_->Fill(jet.Pt());
-      }
+    if ( hjetKinReweight_ != nullptr ) {
+      weight *= hjetKinReweight_->GetBinContent(hjetKinReweight_->FindBin(std::abs(jet.Eta()), jet.Pt()));
+    }
+    hJetPtEtaFinOReffDenom_->Fill(std::abs(jet.Eta()), jet.Pt(), weight);
+    if ( etaBinCut(jet) ) hJetL1ADenom_->Fill(jet.Pt(), weight);
+    if ( L1GtBx[0] ) {
+      hJetPtEtaFinOReffNum_bxm2_->Fill(std::abs(jet.Eta()), jet.Pt(), weight);
+      if ( etaBinCut(jet) ) hJetL1ANum_bxm2_->Fill(jet.Pt(), weight);
+    }
+    if ( L1GtBx[1] ) {
+      hJetPtEtaFinOReffNum_bxm1_->Fill(std::abs(jet.Eta()), jet.Pt(), weight);
+      if ( etaBinCut(jet) ) hJetL1ANum_bxm1_->Fill(jet.Pt(), weight);
+    }
+    if ( L1GtBx[2] ) {
+      hJetPtEtaFinOReffNum_bx0_->Fill(std::abs(jet.Eta()), jet.Pt(), weight);
+      if ( etaBinCut(jet) ) hJetL1ANum_bx0_->Fill(jet.Pt(), weight);
+    }
+    if ( L1GtBx[3] ) {
+      hJetPtEtaFinOReffNum_bx1_->Fill(std::abs(jet.Eta()), jet.Pt(), weight);
+      if ( etaBinCut(jet) ) hJetL1ANum_bx1_->Fill(jet.Pt(), weight);
+    }
+    if ( L1GtBx[4] ) {
+      hJetPtEtaFinOReffNum_bx2_->Fill(std::abs(jet.Eta()), jet.Pt(), weight);
+      if ( etaBinCut(jet) ) hJetL1ANum_bx2_->Fill(jet.Pt(), weight);
     }
   }
 

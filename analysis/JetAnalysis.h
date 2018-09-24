@@ -15,11 +15,13 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
-#include <TH2D.h>
 
 // Headers needed by this particular selector
 #include "Math/GenVector/LorentzVector.h"
 #include "Math/GenVector/VectorUtil.h"
+#include <TH2D.h>
+#include <TGraph.h>
+#include <TMath.h>
 
 #include <vector>
 
@@ -66,8 +68,10 @@ public :
   ClassDef(JetAnalysis,0);
 
 private :
-  TH2F * hreweight_;
+  TH2F * hjetKinReweight_;
   bool useEMfrac_;
+  TGraph * gLumiReweight_;
+  Long64_t runIndexCached_{-1};
 
 
   TH2D * hJetPtEtaEGeffDenom_;

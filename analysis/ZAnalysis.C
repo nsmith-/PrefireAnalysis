@@ -139,13 +139,19 @@ Bool_t ZAnalysis::Process(Long64_t entry)
 
     double minDeltaR{999.};
     int L1match{-1};
+    double prevMinDeltaR{999.};
     int prevL1match{-1};
     for(size_t iEG=0; iEG<L1EG_p4.GetSize(); ++iEG) {
       double dR = DeltaR(L1EG_p4[iEG], pho);
       if ( dR < minDeltaR and (L1EG_iso[iEG] & 1) ) {
-        minDeltaR = dR;
+        prevMinDeltaR = minDeltaR;
         prevL1match = L1match;
+        minDeltaR = dR;
         L1match = iEG;
+      }
+      else if ( dR < prevMinDeltaR and (L1EG_iso[iEG] & 1) ) {
+        prevMinDeltaR = dR;
+        prevL1match = iEG;
       }
     }
     if ( L1match == -1 ) continue;

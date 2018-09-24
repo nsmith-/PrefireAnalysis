@@ -20,6 +20,7 @@ ROOT.gStyle.SetPaintTextFormat(".2f")
 
 # era = "JetHT_2016H"
 era = sys.argv[1]
+dataset, run = era.split("_")
 hdr = era.replace("_", " ")
 outDir = "JetAnalysis/%s" % era
 
@@ -37,10 +38,23 @@ sel = ROOT.JetAnalysis()
 inputs = ROOT.TList()
 sel.SetInputList(inputs)
 
+# Jet kinematic reweighting
 if False:
-    frw = ROOT.TFile.Open("reweight.root")
-    hrw = frw.Get("reweight")
+    frw = ROOT.TFile.Open("jetKinReweight.root")
+    hrw = frw.Get("jetKinReweight")
     inputs.Add(hrw)
+
+# Luminosity correction
+if False:
+    flumirw = ROOT.TFile.Open("lumiCorrection.root")
+    glumirw = flumirw.Get(dataset)
+    if not glumirw:
+        raise Exception("No luminosity correction available for " + dataset)
+    glumirw.SetName("lumiReweight")
+    inputs.Add(glumirw)
+
+useEMfraction = False
+inputs.Add(ROOT.TParameter("bool")("useEMfraction", useEMfraction))
 
 t.Process(sel)
 hists = dict((h.GetName(), h) for h in sel.GetOutputList())
@@ -116,18 +130,18 @@ for ibx, bxn in bx:
     ROOT.SetOwnership(l, False)
 
 
-c2 = ROOT.TCanvas()
-mg = ROOT.TMultiGraph("mgeffthr", ";Jet p_{T}^{EM} [GeV];BX -1 Trigger Efficiency")
-efflow = ROOT.TEfficiency(hists['numJetEGthr_eglow'], hists['denomJetEGthr']).CreateGraph()
+c2 = ROOT.TCanvas("effComparison", "")
+mg = ROOT.TMultiGraph("mgeffthr", ";Jet p_{T}%s [GeV];BX -1 Trigger Efficiency" % ("^{EM}" if useEMfraction else ""))
+efflow = ROOT.TEfficiency(hists['numJetEGthr_eglow'], hists['denomJetEGthr']).CreateGraph("e0")
 efflow.SetMarkerColor(ROOT.kRed)
 mg.Add(efflow, "p")
-effmed = ROOT.TEfficiency(hists['numJetEGthr_egmed'], hists['denomJetEGthr']).CreateGraph()
+effmed = ROOT.TEfficiency(hists['numJetEGthr_egmed'], hists['denomJetEGthr']).CreateGraph("e0")
 effmed.SetMarkerColor(ROOT.kBlue)
 mg.Add(effmed, "p")
-effhigh = ROOT.TEfficiency(hists['numJetEGthr_eghigh'], hists['denomJetEGthr']).CreateGraph()
+effhigh = ROOT.TEfficiency(hists['numJetEGthr_eghigh'], hists['denomJetEGthr']).CreateGraph("e0")
 effhigh.SetMarkerColor(ROOT.kGreen)
 mg.Add(effhigh, "p")
-finorm1 = ROOT.TEfficiency(hists['numL1A_bxm1'], hists['denomL1A']).CreateGraph()
+finorm1 = ROOT.TEfficiency(hists['numL1A_bxm1'], hists['denomL1A']).CreateGraph("e0")
 finorm1.SetMarkerColor(ROOT.kBlack)
 mg.Add(finorm1, "p")
 mg.Draw("a")
