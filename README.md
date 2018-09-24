@@ -1,24 +1,12 @@
 PrefireAnalysis
 ===============
-This package helps analyse the effect of prefiring (particularly from EE in late 2017) on an analysis.
+This package helps analyze the effect of prefiring (particularly from EE in late 2017) on an analysis.
+If interested in a full analysis, the installation and usage instructions are provided.
+For a simple method to establish the impact of prefiring on an analysis, see the jet prefire efficiency map section.
 
-# Event lists
-Rather than run the unprefirable event filter (which requires AOD data tier), it may be simpler/faster to use event lists.
-You will still need to save the trigger information from the previous bunch crossing, discussed below.
-The following lists have been prepared:
+Questions/comments: cms-l1t-ecal-prefiring@cern.ch
 
-| Primary Dataset | Unprefirable event count | ROOT file |
-| --- | --- | --- |
-| `JetHT/Run2017F-31Mar2018-v1` | 282287 | https://ncsmith.web.cern.ch/ncsmith/UnprefirableEventLists/JetHT_Run2017F_unprefirableEvents.root |
-| `SingleElectron/Run2017F-31Mar2018-v1` | 143101 | https://ncsmith.web.cern.ch/ncsmith/UnprefirableEventLists/SingleElectron_Run2017F_unprefirableEvents.root |
-| `SingleMuon/Run2017F-31Mar2018-v1` | 635747 | https://ncsmith.web.cern.ch/ncsmith/UnprefirableEventLists/SingleMuon_Run2017F_unprefirableEvents.root |
-| `MET/Run2017F-31Mar2018-v1` | 367374 | https://ncsmith.web.cern.ch/ncsmith/UnprefirableEventLists/MET_Run2017F_unprefirableEvents.root |
-
-Run2017 lists prepared with `Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt` lumimask.
-Some events may be missing due to failed jobs, which is fine.
-
-
-# Installation
+## Installation
 This should work in any `94X` CMSSW or newer
 ```bash
 pushd $CMSSW_BASE/src
@@ -29,7 +17,7 @@ scram b
 popd
 ```
 
-# Usage
+## Usage
 The idea is to select so-called 'unprefirable' events in whatever primary dataset is used for your analysis,
 and then to check how often a (vetoed) L1A is present in the previous bunch crossing via the uGT record.
 
@@ -66,3 +54,27 @@ Then check with final selection how often this is true.  If the fraction is less
 there is no significant prefiring, as there is always the possibility (~L1A rate / MinBias rate) that interesting physics is
 in the previous bunch crossing.  If much larger, then this is telling you the fraction of data in your phase
 space lost due to prefiring.
+
+## Event lists
+Rather than run the unprefirable event filter (which requires AOD data tier), it may be simpler/faster to use event lists.
+You will still need to save the trigger information from the previous bunch crossing, discussed below.
+The following lists have been prepared:
+
+| Primary Dataset | Unprefirable event count | ROOT file |
+| --- | --- | --- |
+| `JetHT/Run2017F-31Mar2018-v1` | 282287 | https://ncsmith.web.cern.ch/ncsmith/UnprefirableEventLists/JetHT_Run2017F_unprefirableEvents.root |
+| `SingleElectron/Run2017F-31Mar2018-v1` | 143101 | https://ncsmith.web.cern.ch/ncsmith/UnprefirableEventLists/SingleElectron_Run2017F_unprefirableEvents.root |
+| `SingleMuon/Run2017F-31Mar2018-v1` | 635747 | https://ncsmith.web.cern.ch/ncsmith/UnprefirableEventLists/SingleMuon_Run2017F_unprefirableEvents.root |
+| `MET/Run2017F-31Mar2018-v1` | 367374 | https://ncsmith.web.cern.ch/ncsmith/UnprefirableEventLists/MET_Run2017F_unprefirableEvents.root |
+
+Run2017 lists prepared with `Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt` lumimask.
+Some events may be missing due to failed jobs, which is fine.
+
+## Jet prefire efficiencies
+Rather than select the unprefirable subset of events in an analysis (which may often be too small to work with), one can attempt
+to apply a localized prefire efficiency estimate on jets in the event, for those events where jets are the primary driver of the prefiring
+inefficiency.  For example, in a VBF-like topology with two somewhat forward jets, one could imagine applying the following correction:
+`sf = (1-eff(ptEm_j1, absEta_j1))*(1-eff(ptEm_j2, absEta_j2))` where the prefire efficiency is parameterized by the electromagnetic
+component of the jet transverse momentum as well as its position in eta.  _Preliminary_ maps of this efficincy are available for
+some eras in https://ncsmith.web.cern.ch/ncsmith/PrefireEfficiencyMaps/
+

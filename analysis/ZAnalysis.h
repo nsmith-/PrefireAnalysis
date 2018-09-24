@@ -2,11 +2,11 @@
 // This class has been automatically generated on
 // Thu Jun  7 12:16:34 2018 by ROOT version 6.12/06
 // from TTree tree/Event Summary
-// found on file: prefiringJet_Run2016H.root
+// found on file: prefiringZ_Run2016H.root
 //////////////////////////////////////////////////////////
 
-#ifndef JetAnalysis_h
-#define JetAnalysis_h
+#ifndef ZAnalysis_h
+#define ZAnalysis_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -25,7 +25,7 @@
 
 
 
-class JetAnalysis : public TSelector {
+class ZAnalysis : public TSelector {
 public :
   typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double>> LorentzVector;
   TTreeReader    fReader;  //!the tree reader
@@ -36,19 +36,22 @@ public :
   TTreeReaderValue<Long64_t> lumi = {fReader, "lumi"};
   TTreeReaderValue<Long64_t> event = {fReader, "event"};
   TTreeReaderValue<Int_t> bunchCrossing = {fReader, "bunchCrossing"};
-  TTreeReaderArray<LorentzVector> jet_p4 = {fReader, "jet_p4"};
-  TTreeReaderArray<float> jet_neutralEmFrac = {fReader, "jet_neutralEmFrac"};
-  TTreeReaderArray<float> jet_neutralHadFrac = {fReader, "jet_neutralHadFrac"};
-  TTreeReaderArray<float> jet_muonFrac = {fReader, "jet_muonFrac"};
-  TTreeReaderArray<int> jet_id = {fReader, "jet_id"};
+  TTreeReaderValue<Int_t> triggerRule = {fReader, "triggerRule"};
+  TTreeReaderValue<LorentzVector> tag_electron = {fReader, "tag_electron"};
+  TTreeReaderArray<LorentzVector> photon_p4 = {fReader, "photon_p4"};
+  TTreeReaderArray<float> photon_sieie = {fReader, "photon_sieie"};
+  TTreeReaderArray<float> photon_hoe = {fReader, "photon_hoe"};
+  TTreeReaderArray<float> photon_iso = {fReader, "photon_iso"};
   TTreeReaderArray<int> L1EG_bx = {fReader, "L1EG_bx"};
   TTreeReaderArray<LorentzVector> L1EG_p4 = {fReader, "L1EG_p4"};
   TTreeReaderArray<int> L1EG_iso = {fReader, "L1EG_iso"};
+  TTreeReaderArray<int> L1Jet_bx = {fReader, "L1Jet_bx"};
+  TTreeReaderArray<LorentzVector> L1Jet_p4 = {fReader, "L1Jet_p4"};
   TTreeReaderArray<int> L1GtBx = {fReader, "L1GtBx"};
 
 
-  JetAnalysis(TTree * /*tree*/ =0) { }
-  virtual ~JetAnalysis() { }
+  ZAnalysis(TTree * /*tree*/ =0) { }
+  virtual ~ZAnalysis() { }
   virtual Int_t  Version() const { return 2; }
   virtual void   Begin(TTree *tree);
   virtual void   SlaveBegin(TTree *tree);
@@ -63,44 +66,48 @@ public :
   virtual void   SlaveTerminate();
   virtual void   Terminate();
 
-  ClassDef(JetAnalysis,0);
+  ClassDef(ZAnalysis,0);
 
 private :
-  TH2F * hreweight_;
-  bool useEMfrac_;
+  TH2D * hEleL1EGmassL1Pt_bxm1_;
+  TH2D * hEleL1EGmassL1Pt_bx0_;
+  TH2D * hEleL1EGmassL1Pt_bx1_;
 
+  TH2D * hEleL1EGEta2p0massL1Pt_bxm1_;
+  TH2D * hEleL1EGEta2p0massL1Pt_bx0_;
+  TH2D * hEleL1EGEta2p0massL1Pt_bx1_;
 
-  TH2D * hJetPtEtaEGeffDenom_;
-  TH2D * hJetPtEtaEGeffNum_bxm2_;
-  TH2D * hJetPtEtaEGeffNum_bxm1_;
-  TH2D * hJetPtEtaEGeffNum_bx0_;
-  TH2D * hJetPtEtaEGeffNum_bx1_;
-  TH2D * hJetPtEtaEGeffNum_bx2_;
+  TH2D * hEleL1EGEta2p5massL1Pt_bxm1_;
+  TH2D * hEleL1EGEta2p5massL1Pt_bx0_;
+  TH2D * hEleL1EGEta2p5massL1Pt_bx1_;
 
-  TH2D * hJet30EGEtaPhi_;
+  TH2D * hElePhomass_PhoEta_;
+  TH2D * hPhoIso_eta_mCut_;
+  TH2D * hPhoSieie_eta_mCut_;
+  TH2D * hPhoHoE_eta_mCut_;
+  TH2D * hElePhoCutmass_PhoEta_;
 
-  TH2D * hJetPtEtaFinOReffDenom_;
-  TH2D * hJetPtEtaFinOReffNum_bxm2_;
-  TH2D * hJetPtEtaFinOReffNum_bxm1_;
-  TH2D * hJetPtEtaFinOReffNum_bx0_;
-  TH2D * hJetPtEtaFinOReffNum_bx1_;
-  TH2D * hJetPtEtaFinOReffNum_bx2_;
+  TH1D * hPhoL1EGDeltaR_bxm1_;
+  TH1D * hPhoL1EGDeltaR_bx0_;
+  TH1D * hPhoL1EGDeltaR_bx1_;
+  TH1D * hPhoL1EGDeltaRsecond_;
+  TH2D * hPhoL1EGnearestBx_;
 
-  TH1D * hJetL1ADenom_;
-  TH1D * hJetL1ANum_bxm2_;
-  TH1D * hJetL1ANum_bxm1_;
-  TH1D * hJetL1ANum_bx0_;
-  TH1D * hJetL1ANum_bx1_;
-  TH1D * hJetL1ANum_bx2_;
+  TH2D * hElePhomassL1Pt_bxm1_;
+  TH2D * hElePhomassL1Pt_bx0_;
+  TH2D * hElePhomassL1Pt_bx1_;
 
-  TH1D * hJetEGm1thrDenom_;
-  TH1D * hJetEGm1thrNum_EGlow_;
-  TH1D * hJetEGm1thrNum_EGmed_;
-  TH1D * hJetEGm1thrNum_EGhigh_;
+  TH2D * hElePhoEta1p0massL1Pt_bxm1_;
+  TH2D * hElePhoEta1p0massL1Pt_bx0_;
+  TH2D * hElePhoEta1p0massL1Pt_bx1_;
 
-  TH1D * hJetEGdeltaR_bxm1_;
-  TH1D * hJetEGdeltaR_bx0_;
-  TH1D * hJetEGdeltaR_bx1_;
+  TH2D * hElePhoEta2p0massL1Pt_bxm1_;
+  TH2D * hElePhoEta2p0massL1Pt_bx0_;
+  TH2D * hElePhoEta2p0massL1Pt_bx1_;
+
+  TH2D * hElePhoEta2p5massL1Pt_bxm1_;
+  TH2D * hElePhoEta2p5massL1Pt_bx0_;
+  TH2D * hElePhoEta2p5massL1Pt_bx1_;
 
   template<typename T, typename... Args>
     T * newOutput(Args... args) {
@@ -112,8 +119,8 @@ private :
 
 #endif
 
-#ifdef JetAnalysis_cxx
-void JetAnalysis::Init(TTree *tree)
+#ifdef ZAnalysis_cxx
+void ZAnalysis::Init(TTree *tree)
 {
   // The Init() function is called when the selector needs to initialize
   // a new tree or chain. Typically here the reader is initialized.
@@ -125,7 +132,7 @@ void JetAnalysis::Init(TTree *tree)
   fReader.SetTree(tree);
 }
 
-Bool_t JetAnalysis::Notify()
+Bool_t ZAnalysis::Notify()
 {
   // The Notify() function is called when a new file is opened. This
   // can be either for a new TTree in a TChain or when when a new TTree
@@ -137,4 +144,4 @@ Bool_t JetAnalysis::Notify()
 }
 
 
-#endif // #ifdef JetAnalysis_cxx
+#endif // #ifdef ZAnalysis_cxx
