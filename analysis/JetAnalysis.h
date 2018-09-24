@@ -70,6 +70,7 @@ public :
 private :
   TH2F * hjetKinReweight_;
   bool useEMfrac_;
+  bool doCentralJetTrigger_;
   TGraph * gLumiReweight_;
   Long64_t runIndexCached_{-1};
 

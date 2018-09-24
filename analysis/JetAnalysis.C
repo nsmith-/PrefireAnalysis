@@ -95,6 +95,7 @@ void JetAnalysis::SlaveBegin(TTree * /*tree*/)
   };
 
   useEMfrac_ = getFlag("useEMfraction");
+  doCentralJetTrigger_ = getFlag("doCentralJetTrigger");
 
   TString option = GetOption();
 
@@ -106,16 +107,18 @@ Bool_t JetAnalysis::Process(Long64_t entry)
   auto bit = [] (int i) { return 1<<i; };
   fReader.SetEntry(entry);
 
-  // Central jet trigger
-  // bool centralJetTrigger{false};
-  // for(size_t iJet=0; iJet<jet_p4.GetSize(); ++iJet) {
-  //   // HLT_PFJet500
-  //   if ( std::abs(jet_p4[iJet].Eta()) < 1.5 and (jet_id[iJet]&8)==8 ) {
-  //     centralJetTrigger = true;
-  //   }
-  // }
-  // if ( not centralJetTrigger ) return true;
-  
+  // Central jet trigger for JetHT dataset
+  if ( doCentralJetTrigger_ ) {
+    bool centralJetTrigger{false};
+    for(size_t iJet=0; iJet<jet_p4.GetSize(); ++iJet) {
+      // HLT_PFJet 450 or 500 or 550
+      if ( std::abs(jet_p4[iJet].Eta()) < 1.5 and (jet_id[iJet]&28)>0 ) {
+        centralJetTrigger = true;
+      }
+    }
+    if ( not centralJetTrigger ) return true;
+  }
+    
   // Drop 2016H hotspot
   if ( *run >= 280919 and *run <= 284044 ) {
     for(size_t iJet=0; iJet<jet_p4.GetSize(); ++iJet) {

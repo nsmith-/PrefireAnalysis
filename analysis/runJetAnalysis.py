@@ -38,14 +38,25 @@ sel = ROOT.JetAnalysis()
 inputs = ROOT.TList()
 sel.SetInputList(inputs)
 
+# Lumi reweight
+doLumiReweight = True
+# Jet pT or pT_EM
+useEMfraction = False
 # Jet kinematic reweighting
-if False:
+doJetKin = True
+# Use only events with central jet in JetHT dataset
+doCentralJetTrigger = True
+
+
+# (numerator JetHT, denominator SingleMuon)
+if doJetKin and dataset == 'JetHT':
+    # TODO: multiple run eras
     frw = ROOT.TFile.Open("jetKinReweight.root")
     hrw = frw.Get("jetKinReweight")
     inputs.Add(hrw)
 
 # Luminosity correction
-if False:
+if doLumiReweight:
     flumirw = ROOT.TFile.Open("lumiCorrection.root")
     glumirw = flumirw.Get(dataset)
     if not glumirw:
@@ -53,8 +64,8 @@ if False:
     glumirw.SetName("lumiReweight")
     inputs.Add(glumirw)
 
-useEMfraction = False
 inputs.Add(ROOT.TParameter("bool")("useEMfraction", useEMfraction))
+inputs.Add(ROOT.TParameter("bool")("doCentralJetTrigger", doCentralJetTrigger and dataset=='JetHT'))
 
 t.Process(sel)
 hists = dict((h.GetName(), h) for h in sel.GetOutputList())
