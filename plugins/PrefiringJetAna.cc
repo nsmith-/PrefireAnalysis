@@ -22,6 +22,9 @@
 #include "DataFormats/L1Trigger/interface/EGamma.h"
 #include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
+#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
+#include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
+#include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 
 #include "TTree.h"
 
@@ -42,6 +45,8 @@ namespace {
     std::vector<float> jet_neutralEmFrac;
     std::vector<float> jet_neutralHadFrac;
     std::vector<float> jet_muonFrac;
+    // bits 0=loose ID, 1=tight ID, 2-4=match to HLT_PFJet 450,500,550
+    std::vector<int> jet_id;
 
     LorentzVector met;
 
@@ -54,6 +59,17 @@ namespace {
 
     std::vector<int> L1GtBx;
   };
+
+  std::vector<const pat::TriggerObjectStandAlone*> getMatchedObjs(const float eta, const float phi, const std::vector<pat::TriggerObjectStandAlone>& trigObjs, const float maxDeltaR=0.1)
+  {
+    std::vector<const pat::TriggerObjectStandAlone*> matchedObjs;
+    const float maxDR2 = maxDeltaR*maxDeltaR;
+    for(auto& trigObj : trigObjs){
+      const float dR2 = reco::deltaR2(eta,phi,trigObj.eta(),trigObj.phi());
+      if(dR2<maxDR2) matchedObjs.push_back(&trigObj);
+    }
+    return matchedObjs;
+  }
 }
 
 class PrefiringJetAna : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
@@ -70,6 +86,8 @@ class PrefiringJetAna : public edm::one::EDAnalyzer<edm::one::SharedResources>  
 
     PFJetIDSelectionFunctor looseJetIdSelector_{PFJetIDSelectionFunctor::WINTER16, PFJetIDSelectionFunctor::LOOSE};
     pat::strbitset hasLooseId_;
+    PFJetIDSelectionFunctor tightJetIdSelector_{PFJetIDSelectionFunctor::WINTER16, PFJetIDSelectionFunctor::TIGHT};
+    pat::strbitset hasTightId_;
 
     edm::EDGetTokenT<int> triggerRuleToken_;
     edm::EDGetTokenT<pat::JetCollection> jetToken_;
@@ -78,6 +96,8 @@ class PrefiringJetAna : public edm::one::EDAnalyzer<edm::one::SharedResources>  
     edm::EDGetTokenT<BXVector<l1t::EGamma>> l1egToken_;
     edm::EDGetTokenT<BXVector<l1t::Jet>> l1jetToken_;
     edm::EDGetTokenT<BXVector<GlobalAlgBlk>> l1GtToken_;
+    edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> triggerObjectsToken_;
+    edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescalesToken_;
 
     TTree * tree_;
     EventStruct event_;
@@ -90,12 +110,15 @@ PrefiringJetAna::PrefiringJetAna(const edm::ParameterSet& iConfig):
   tagJetCut_(iConfig.getParameter<std::string>("tagJetCut")),
   l1egToken_(consumes<BXVector<l1t::EGamma>>(iConfig.getParameter<edm::InputTag>("l1egSrc"))),
   l1jetToken_(consumes<BXVector<l1t::Jet>>(iConfig.getParameter<edm::InputTag>("l1jetSrc"))),
-  l1GtToken_(consumes<BXVector<GlobalAlgBlk>>(iConfig.getParameter<edm::InputTag>("l1GtSrc")))
+  l1GtToken_(consumes<BXVector<GlobalAlgBlk>>(iConfig.getParameter<edm::InputTag>("l1GtSrc"))),
+  triggerObjectsToken_(consumes<pat::TriggerObjectStandAloneCollection>(iConfig.getParameter<edm::InputTag>("triggerObjects"))),
+  triggerPrescalesToken_(consumes<pat::PackedTriggerPrescales>(iConfig.getParameter<edm::InputTag>("triggerPrescales")))
 {
   usesResource("TFileService");
   edm::Service<TFileService> fs;
 
   hasLooseId_ = looseJetIdSelector_.getBitTemplate();
+  hasTightId_ = tightJetIdSelector_.getBitTemplate();
 
   tree_ = fs->make<TTree>("tree","Event Summary");
   tree_->Branch("run", &event_.run);
@@ -107,6 +130,7 @@ PrefiringJetAna::PrefiringJetAna(const edm::ParameterSet& iConfig):
   tree_->Branch("jet_neutralEmFrac", &event_.jet_neutralEmFrac);
   tree_->Branch("jet_neutralHadFrac", &event_.jet_neutralHadFrac);
   tree_->Branch("jet_muonFrac", &event_.jet_muonFrac);
+  tree_->Branch("jet_id", &event_.jet_id);
   tree_->Branch("met", &event_.met);
   tree_->Branch("L1EG_bx", &event_.L1EG_bx);
   tree_->Branch("L1EG_p4", &event_.L1EG_p4);
@@ -150,21 +174,51 @@ PrefiringJetAna::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   Handle<BXVector<GlobalAlgBlk>> l1GtHandle;
   iEvent.getByToken(l1GtToken_, l1GtHandle);
 
+  Handle<pat::TriggerObjectStandAloneCollection> triggerObjectsHandle;
+  iEvent.getByToken(triggerObjectsToken_, triggerObjectsHandle);
+
+  Handle<pat::PackedTriggerPrescales> triggerPrescalesHandle;
+  iEvent.getByToken(triggerPrescalesToken_, triggerPrescalesHandle);
+  const edm::TriggerResults& triggerResults = triggerPrescalesHandle->triggerResults();
+
 
   event_.jet_p4.clear();
   event_.jet_neutralEmFrac.clear();
   event_.jet_neutralHadFrac.clear();
   event_.jet_muonFrac.clear();
+  event_.jet_id.clear();
   for(const auto& jet : *jetHandle) {
     pat::Jet jetNew(jet);
+    int packedIds = 0;
     jetNew.addUserInt("looseJetId", looseJetIdSelector_(jetNew, hasLooseId_));
+    packedIds |= ((int) looseJetIdSelector_(jetNew, hasLooseId_))<<0;
+    jetNew.addUserInt("tightJetId", tightJetIdSelector_(jetNew, hasTightId_));
+    packedIds |= ((int) tightJetIdSelector_(jetNew, hasTightId_))<<1;
 
     if ( not tagJetCut_(jetNew) ) continue;
+
+    std::vector<const pat::TriggerObjectStandAlone*> matchedTrigObjs = getMatchedObjs(jet.eta(), jet.phi(), *triggerObjectsHandle, 0.3);
+    for (const auto trigObjConst : matchedTrigObjs) {
+      pat::TriggerObjectStandAlone trigObj(*trigObjConst);
+      trigObj.unpackNamesAndLabels(iEvent, triggerResults);
+
+      // HLT_PFJetX_v*
+      if ( trigObj.hasFilterLabel("hltSinglePFJet450") ) {
+        packedIds |= 1<<2;
+      }
+      if ( trigObj.hasFilterLabel("hltSinglePFJet500") ) {
+        packedIds |= 1<<3;
+      }
+      if ( trigObj.hasFilterLabel("hltSinglePFJet550") ) {
+        packedIds |= 1<<4;
+      }
+    }
 
     event_.jet_p4.push_back( jetNew.p4() );
     event_.jet_neutralEmFrac.push_back( jetNew.neutralEmEnergyFraction() );
     event_.jet_neutralHadFrac.push_back( jetNew.neutralHadronEnergyFraction() );
     event_.jet_muonFrac.push_back( jetNew.muonEnergyFraction() );
+    event_.jet_id.push_back( packedIds );
   }
 
   event_.met = metHandle->at(0).p4();
