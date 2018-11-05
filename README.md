@@ -1,10 +1,30 @@
 PrefireAnalysis
 ===============
-This package helps analyze the effect of prefiring (particularly from EE in late 2017) on an analysis.
+This package helps analyze the effect of prefiring (particularly from EE in 2016-2017) on an analysis.
 If interested in a full analysis, the installation and usage instructions are provided.
 For a simple method to establish the impact of prefiring on an analysis, see the jet prefire efficiency map section.
 
 Questions/comments: cms-l1t-ecal-prefiring@cern.ch
+
+## Jet prefire efficiencies
+
+For those who want a quick check, before diving deeper into the investigation, please consider the following method:
+
+Rather than select the unprefirable subset of events in an analysis (which may often be too small to work with), one can attempt
+to apply a localized prefire efficiency estimate on jets in the event, for those events where jets are the primary driver of the prefiring
+inefficiency.  For example, in a VBF-like topology with two somewhat forward jets, one could imagine applying the following correction:
+`sf = (1-eff(pt_j1, absEta_j1))*(1-eff(pt_j2, absEta_j2))` where the prefire efficiency is parameterized by the jet transverse momentum as well as its position in eta.  One could also try to isolate the effect by making an efficiency map as a function of jet EM pt (i.e. charged+neutral EM energy fraction * pt), and both types of parameterization have been investigated.  
+
+_Preliminary_ maps of this efficiency are available for:
+   - 2016 at https://ncsmith.web.cern.ch/ncsmith/PrefireEfficiencyMaps/
+   - 2017 at https://lathomas.web.cern.ch/lathomas/TSGStuff/L1Prefiring/PrefiringMaps/
+   
+More information can be found in the presentations of https://indico.cern.ch/event/764279/#2-l1-pre-firing-in-2016-and-20
+
+An overview/review of the effect can be found at https://indico.cern.ch/event/734407/contributions/3049707/
+
+Questions/comments: cms-l1t-ecal-prefiring@cern.ch
+
 
 ## Installation
 This should work in any `94X` CMSSW or newer
@@ -69,12 +89,3 @@ The following lists have been prepared:
 
 Run2017 lists prepared with `Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt` lumimask.
 Some events may be missing due to failed jobs, which is fine.
-
-## Jet prefire efficiencies
-Rather than select the unprefirable subset of events in an analysis (which may often be too small to work with), one can attempt
-to apply a localized prefire efficiency estimate on jets in the event, for those events where jets are the primary driver of the prefiring
-inefficiency.  For example, in a VBF-like topology with two somewhat forward jets, one could imagine applying the following correction:
-`sf = (1-eff(ptEm_j1, absEta_j1))*(1-eff(ptEm_j2, absEta_j2))` where the prefire efficiency is parameterized by the electromagnetic
-component of the jet transverse momentum as well as its position in eta.  _Preliminary_ maps of this efficincy are available for
-some eras in https://ncsmith.web.cern.ch/ncsmith/PrefireEfficiencyMaps/
-
