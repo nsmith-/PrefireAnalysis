@@ -34,7 +34,7 @@ process.source = cms.Source("PoolSource",
 )
 
 process.prefireVetoFilter = cms.EDFilter("TriggerRulePrefireVetoFilter",
-    tcdsRecordLabel = cms.InputTag("tcdsDigis:tcdsRecord"),
+    l1AcceptRecordLabel = cms.InputTag("scalersRawToDigi"),
 )
 process.skimPath = cms.Path(process.prefireVetoFilter)
 
